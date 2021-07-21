@@ -1,14 +1,15 @@
 import React from 'react'
+import { useDispatch } from 'react-redux'
 import fbAPI from '../../facebookAPI/fbInitialize'
+import { login } from '../../redux/reducers/reducer'
 import './login-page.less'
 
 const LoginPage = () => {
 
+    const dispatch = useDispatch();
+
     const logIn = () => {
-        console.log(window.FB);
-        window.FB.login(function(response) {
-            // handle the response
-          }, {scope: 'public_profile,email'});
+        dispatch(login);
     }
 
     return (

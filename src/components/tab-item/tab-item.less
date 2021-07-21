@@ -1,0 +1,31 @@
+.tab-item {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 80px;
+    height: 50px;
+    margin: 0 5px;
+    border: 2px solid #e2e2e2;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-bottom: -4px;
+    background-color: #fff;
+    opacity: 0.5;
+
+    img {
+        width: 30px;
+        height: 25px;
+        pointer-events: none;
+    }
+
+    &:hover {
+        transform: scale(1.05);
+    }
+}
+
+.activ-tab {
+    opacity: 1;
+    z-index: 5;
+}

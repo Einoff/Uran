@@ -5,12 +5,14 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import store from './redux/store';
 import fbAPI from './facebookAPI/fbInitialize';
-
+import { BrowserRouter } from 'react-router-dom';
 
 ReactDom.render(
     <Provider store={store}>
-        <App/>
+        <BrowserRouter>
+            <App />
+        </BrowserRouter>
     </Provider>,
-    
+
     document.getElementById('root')
 )

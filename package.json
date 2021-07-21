@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "webpack serve --open --https"
+    "start": "webpack serve --open --https --history-api-fallback"
   },
   "repository": {
     "type": "git",
@@ -38,6 +38,7 @@
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-redux": "^7.2.4",
+    "react-router-dom": "^5.2.0",
     "redux": "^4.1.0",
     "redux-thunk": "^2.3.0"
   }

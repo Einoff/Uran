@@ -1,9 +1,29 @@
 
-const appId = '877538953113651';
+const appId = '346168630339909';
+
+const getLoginStatus = (FB, setInitFbData) => {
+    FB.getLoginStatus(({status}) => {
+        if(status === 'not_authorized' || status === 'unknown') {
+            setInitFbData(
+                {
+                    status: false,
+                    fbData: FB
+                }
+            );
+        } else {
+            setInitFbData(
+                {
+                    status: true,
+                    fbData: FB
+                }
+            );
+        }
+    })
+}
 
 const fbAPI = {
-
-    init: (getLoginStatus) => {
+    init: (setInitFbData) => {
+        
         window.fbAsyncInit = function() {
             FB.init({
                 appId,
@@ -11,17 +31,8 @@ const fbAPI = {
                 xfbml      : true,
                 version    : 'v11.0'
             });
-    
-            FB.AppEvents.logPageView(); 
-            
-            FB.getLoginStatus(({status}) => {
-                if(status === 'not_authorized' || status === 'unknown') {
-                    getLoginStatus(false);
-                } else {
-                    getLoginStatus(true);
-                }
-                
-            })
+
+            getLoginStatus(FB, setInitFbData);
         };
     
         (function(d, s, id){
@@ -32,11 +43,7 @@ const fbAPI = {
             fjs.parentNode.insertBefore(js, fjs);
         }(document, 'script', 'facebook-jssdk'));
     },
-    getLoginStatus: () => {
-        if(FBData) {
-             FBData.getLoginStatus(response => response);
-        }
-    }
+    getLoginStatus
 }
 
 export default fbAPI;
