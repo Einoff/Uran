@@ -12,3 +12,6 @@ export const getUserInfo = (state) => {
 export const getFbData = (state) => {
     return state.mainReducer.servData;
 }
+export const getAlbums = (state) => {
+    return state.mainReducer.photoAlbums;
+}

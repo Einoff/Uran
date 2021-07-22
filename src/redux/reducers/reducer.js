@@ -1,13 +1,17 @@
 import vkApi from "../../vkontakteAPI/vkApi";
 
+//
 //ACTION TYPES
+//
 const LOGIN_STATUS = 'LOGIN_STATUS';
 const SET_SERV_DATA = 'SET_SERV_DATA';
 const SET_ACTIVE_MENU_TAB = 'SET_ACTIVE_MENU_TAB';
 const SET_NAME_OF_LOGINED_USER = 'SET_NAME_OF_LOGINED_USER';
 const SET_PHOTO_ALBUMS_DATA = 'SET_PHOTO_ALBUMS_DATA';
 
+//
 //INITIAL STATE
+//
 const initialState = {
     loginStatus: null,
     activeMenuTab: 'album',
@@ -17,7 +21,9 @@ const initialState = {
     photoAlbums: []
 }
 
+//
 //REDUCER
+//
 const mainReducer = (state = initialState, {type, payload}) => {
     switch(type) {
         case LOGIN_STATUS:
@@ -50,7 +56,9 @@ const mainReducer = (state = initialState, {type, payload}) => {
     }
 }
 
+//
 // ACTION CREATORS
+//
 const setLoginStatus = (payload) => {
     return {
         type: LOGIN_STATUS,
@@ -86,7 +94,16 @@ const setPhotoAlbumDataAc = (payload) => {
     }
 }
 
+const setPhotosByAlbumIdAc = (payload) => {
+    return {
+        type: SET_PHOTOS_BY_ALBUM_ID,
+        payload
+    }
+}
+
+//
 //THUNKS
+//
 
 //INIT
 export const setInitialServData = (dispatch) => {
@@ -98,11 +115,6 @@ export const setInitialServData = (dispatch) => {
             if(!status) return;
             
             setUserName(dispatch);
-            setPhotoAlbumData(dispatch);
-
-            // window.VK.Api.call('photos.get', {album_id: '280320184', photo_sizes: '0', v: '5.131'}, function(r) {
-            //     console.log(r);
-            //   });
         });
     }
 
@@ -131,23 +143,33 @@ export const logout = (dispatch) => {
     });
 }
 
+export const openAlbumTh = (id) => (dispatch) => {
+        console.log(id);
+        
+            // window.VK.Api.call('photos.get', {album_id: '280320184', photo_sizes: '0', v: '5.131'}, function(r) {
+            //     console.log(r);
+            //   });
+}
+
+export const setPhotoAlbumDataTh = (dispatch) => {
+    
+    window.VK.Api.call('photos.getAlbums', {need_covers: '1', v: '5.131'}, ({response}) => {
+        const albumsData = response.items.map(({id, title, description, size, thumb_src, updated}) => {
+            const lastUpdate = getLastUpdateAlbumTime(updated);
+            return {id, title, description, size, thumb_src, lastUpdate};
+        })
+        console.log('photo');
+        dispatch(setPhotoAlbumDataAc(albumsData));
+    });
+}
+
+//
 //HELPERS
+//
 function statusToBool (status) {
     let statusFlag = false;
     if(status === 'connected') statusFlag = true;
     return statusFlag;
-}
-
-function setPhotoAlbumData (dispatch) {
-    window.VK.Api.call('photos.getAlbums', {need_covers: '1', v: '5.131'}, ({response}) => {
-
-        const albumsData = response.items.map(({id, title, description, size, thumb_src, updated}) => {
-            const timeAgo = getTimeDifference(updated);
-            return {id, title, description, size, thumb_src, timeAgo}
-        })
-
-        dispatch(setPhotoAlbumDataAc(albumsData));
-    });
 }
 
 function setUserName (dispatch) {
@@ -156,7 +178,7 @@ function setUserName (dispatch) {
     }); 
 }
 
-function getTimeDifference (previousTime) {
+function getLastUpdateAlbumTime (previousTime) {
     const currentTime = parseInt(new Date().getTime());
     const hours = new Date(currentTime - (previousTime * 1000)).getHours();
     if ((hours / 8770) >= 1 ) return parseInt(hours / 8760) + ' years ago';

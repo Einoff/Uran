@@ -1,0 +1,51 @@
+.album-card {
+    display: flex;
+    align-items: center;
+    height: 130px;
+    border-bottom: 1px solid #e2e2e2;
+    padding: 0 20px;
+    overflow: hidden;
+    background-color: #f8f8f8;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+        transform: translate(5px, 0);
+        background-color: #f8f8f8c9;
+    }
+
+    &__img {
+        height: 90px;
+        width: 90px;
+        border-radius: 5px;
+        border: 1px solid #fff;
+        overflow: hidden;
+
+        img {
+            height: 100%;
+            width: 100%;
+            object-fit: cover;
+            object-position: center;
+        }
+    }
+
+    &__info {
+        margin-left: 15px;
+    }
+
+    &__title {
+        color: #5185ba;
+        font-size: 20px;
+    }
+
+    &__files {
+        font-size: 14px;
+        color: #98999a;
+        line-height: 1.3;
+    }
+
+    &__last-udate {
+        font-size: 14px;
+        color: #98999a;
+    }
+}   
