@@ -9,7 +9,9 @@ module.exports = {
         path: path.resolve(__dirname, './dist'),
         filename: '[name].[hash].js'
     },
+    devtool: 'inline-source-map',
     devServer: {
+        open: true,
         port: 3000
     },
     resolve: {
@@ -50,7 +52,7 @@ module.exports = {
                 use: {
                   loader: "babel-loader",
                   options: {
-                    presets: ['@babel/preset-env', "@babel/preset-react"]
+                    presets: ["@babel/preset-react"]
                   }
                 }
             }

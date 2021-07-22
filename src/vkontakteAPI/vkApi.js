@@ -20,5 +20,4 @@ const vkApi = {
     }
 }
 
-
 export default vkApi;
