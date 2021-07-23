@@ -9,7 +9,7 @@ const AlbumCard = ({data}) => {
     const history = useHistory();
     
     const openAlbum = () => {
-        history.push('/albums/' + id);
+        history.push('/albums/' + title + '_' + id);
     }
 
     return (

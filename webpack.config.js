@@ -7,12 +7,17 @@ module.exports = {
     entry: ['@babel/polyfill', './src/index.jsx'],
     output: {
         path: path.resolve(__dirname, './dist'),
-        filename: '[name].[hash].js'
+        filename: '[name].[hash].js',
+        publicPath: '/'
     },
     devtool: 'inline-source-map',
     devServer: {
         open: true,
-        port: 3000
+        port: 3000,
+        https: true,
+        historyApiFallback: {
+            disableDotRule: true,
+        },
     },
     resolve: {
         extensions: ['.js', '.jsx'],
