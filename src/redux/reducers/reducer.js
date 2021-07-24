@@ -10,19 +10,21 @@ const SET_NAME_OF_LOGINED_USER = 'SET_NAME_OF_LOGINED_USER';
 const SET_PHOTO_ALBUMS_DATA = 'SET_PHOTO_ALBUMS_DATA';
 const SET_PHOTOS_BY_ALBUM_ID = 'SET_PHOTO_DATA';
 const SET_NAV_LINK = 'SET_NAV_LINK';
+const SET_MODAL_DATA = 'SET_MODAL_DATA';
 
 //
 //INITIAL STATE
 //
 const initialState = {
     loginStatus: null,
-    activeMenuTab: 'album',
+    activeMenuTab: '/albums',
     userInfo: {
         name: 'unknown'
     },
     photoAlbums: [],
     photos: [],
     navLink: [],
+    modalData: ''
 }
 
 //
@@ -64,6 +66,11 @@ const mainReducer = (state = initialState, {type, payload}) => {
             return {
                 ...state,
                 navLink: payload
+            }
+        case SET_MODAL_DATA: 
+            return {
+                ...state,
+                modalData: {...payload}
             }
 
         default: return state;
@@ -118,6 +125,13 @@ const setPhotosByAlbumIdAc = (payload) => {
 export const setNavLinkAc = (payload) => {
     return {
         type: SET_NAV_LINK,
+        payload
+    }
+}
+
+const setModalDataAc = (payload) => {
+    return {
+        type: SET_MODAL_DATA,
         payload
     }
 }
@@ -195,6 +209,32 @@ export const setNavLinkTh = ({pathname=[]}) => (dispatch) => {
         .split(/\//)
         .filter(item => item);
         dispatch(setNavLinkAc(currentNavLink));
+}
+
+export const setModalDataTh = ({img=null, id=null, nav=false, photos=[]}) => (dispatch) => {
+    // !img && dispatch(setModalDataAc({img, id}));
+    if(nav == 'prev') {
+        let current = photos.findIndex(item => item.id == id);
+        
+        if(current == 0) current = photos.length - 1;
+
+        const prevPhoto = photos[current - 1];
+        dispatch(setModalDataAc(prevPhoto));
+        return;
+    }
+
+    if(nav == 'next') {
+        let current = photos.findIndex(item => item.id == id);
+        
+        if(current == photos.length - 1) current = 0;
+
+        const prevPhoto = photos[current + 1];
+        dispatch(setModalDataAc(prevPhoto));
+        return;
+    }
+    
+    dispatch(setModalDataAc({img, id}));
+
 }
 
 //

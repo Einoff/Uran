@@ -1,26 +1,31 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import { useHistory, useLocation } from 'react-router-dom';
 import { setActiveMenuTab } from '../../redux/reducers/reducer';
 import { getActiveMenuTab } from '../../selectors/selectors';
 import './tab-item.less'
 
 const TabItem = ({icon, type}) => {
-
+    console.log('tabitem');
+    const history = useHistory();
     const dispatch = useDispatch();
-    const activeTab = useSelector(getActiveMenuTab);
+    const activTab = useSelector(getActiveMenuTab);
 
+    // const location = useLocation();
+    // console.log(location);
+    
     const onTabClick = () => {
-        window.FB.api('/me?fields=user_photos,birthday', res => console.log(res));
-        dispatch(setActiveMenuTab(type));
+        // history.push(type);
+        // dispatch(setActiveMenuTab(type));
     }
 
     return (
         <div className={
-                activeTab === type ? "tab-item activ-tab"
-                : "tab-item"
-             } 
-             onClick={onTabClick}>
-        {/* <div className="tab-item" onClick={onTabClick}> */}
+                activTab === type ? 
+                "tab-item activ-tab"
+                : "tab-item"}
+                 onClick={onTabClick}>
+
             <img src={icon} alt="" />
         </div>
     )

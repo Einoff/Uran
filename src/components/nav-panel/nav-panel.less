@@ -9,8 +9,25 @@
     color: #7b7b7b;
     font-weight: 700;
 
+    &__arrow-left {
+        cursor: pointer;
+        transition: all 0.2s;
+        margin-right: 10px !important;
+
+        &:hover {
+            transform: scale(1.1);
+        }
+    }
+
     &__info {
+        display: flex;
+        align-items: center;
         text-transform: capitalize;
+
+        img {
+            height: 20px;
+            margin-right: 5px;
+        }
         span {
                 
             

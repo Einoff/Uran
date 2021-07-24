@@ -3,6 +3,8 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useHistory, useLocation } from 'react-router-dom'
 import { setNavLinkTh } from '../../redux/reducers/reducer'
 import { getNavLink, getUserInfo } from '../../selectors/selectors'
+import folderImg from '../../assets/icons/folder.svg'
+import arrowLeft from '../../assets/icons/arrow-left.svg'
 import './nav-panel.less'
 
 const NavPanel = () => {
@@ -16,7 +18,7 @@ const NavPanel = () => {
     const navLink = useSelector(getNavLink);
 
     const goBackToAlbums = () => {
-        history.push('/alboms');
+        history.push('/albums');
     }
 
     useEffect(() => {
@@ -25,7 +27,19 @@ const NavPanel = () => {
 
     return (
             <div className="nav-panel">
-                <div className="nav-panel__info"><span onClick={goBackToAlbums}>👇 👈 </span> {navLink[navLink.length - 1]}</div>
+                <div className="nav-panel__info">
+                    <div className="nav-panel__btns">
+                        { navLink.length > 1 &&  <img src={arrowLeft} 
+                                                    className="nav-panel__arrow-left" 
+                                                    alt="arrowLeft" 
+                                                    onClick={goBackToAlbums}/> }
+                        
+                        { navLink.length > 1 &&  <img src={folderImg} alt="folder" /> }
+                    </div>
+                                      
+                    {navLink[navLink.length - 1]}
+                </div>
+
                 <div className="nav-panel__user-info">Welcome, {name}.</div>
             </div>
     )
