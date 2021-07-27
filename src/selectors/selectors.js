@@ -15,7 +15,11 @@ export const getFbData = (state) => {
 }
 
 export const getAlbums = (state) => {
-    return state.mainReducer.photoAlbums;
+    const photoAlbums = state.mainReducer.photoAlbums;
+    
+    return photoAlbums.length == 0 
+    ? false
+    : state.mainReducer.photoAlbums
 }
 
 export const getPhotos = (state) => {
@@ -28,4 +32,8 @@ export const getNavLink = (state) => {
 
 export const getModalData = (state) => {
     return state.mainReducer.modalData;
+}
+
+export const getUploadData = (state) => {
+    return state.mainReducer.uploadData;
 }
