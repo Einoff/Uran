@@ -10,9 +10,9 @@ const TabMenu = () => {
     
     const tabs = pageLinks.map(({link, img}) => {
         return (
-            <Link to={link} key={link}>
-                <TabItem icon={img} type={link} />
-            </Link>
+            // <Link to={link} key={link}>
+                <TabItem key={link} icon={img} type={link} />
+            // </Link> 
         )
     })
 

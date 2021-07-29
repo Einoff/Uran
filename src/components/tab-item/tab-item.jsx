@@ -6,17 +6,16 @@ import { getActiveMenuTab } from '../../selectors/selectors';
 import './tab-item.less'
 
 const TabItem = ({icon, type}) => {
-    console.log('tabitem');
+    
     const history = useHistory();
     const dispatch = useDispatch();
     const activTab = useSelector(getActiveMenuTab);
 
     // const location = useLocation();
-    // console.log(location);
     
     const onTabClick = () => {
-        // history.push(type);
-        // dispatch(setActiveMenuTab(type));
+        history.push(type);
+        dispatch(setActiveMenuTab(type));
     }
 
     return (

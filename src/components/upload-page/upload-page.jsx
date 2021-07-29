@@ -7,20 +7,20 @@ import './upload-page.less'
 import UploadItem from './uploadItem/uploadItem';
 
 const UploadPage = () => {
-    console.log('upload page');
 
+    //hooks
     const inputFileRef = useRef(null);
-
     const albums = useSelector(getAlbums);
-    const uploadData = useSelector(getUploadData);
-    
+    const uploadData = useSelector(getUploadData); 
+    // const [isDragged, setDragStatus] = useState(false);
     const [photoAlbumId, setphotoAlbumId] = useState('');
+
     
     const dispatch = useDispatch();
 
     useEffect(() => {
         //set initial value for select
-        albums && setphotoAlbumId(albums[0]);
+        albums && setphotoAlbumId(albums[0].id);
     }, [albums.length])
 
     if(!albums) {
@@ -32,9 +32,33 @@ const UploadPage = () => {
         inputFileRef.current.click();
     }
 
-    const inputFileHandler = (e) => {
-        const files = Array.from(e.target.files);
-        dispatch(setUploadDataTh(files, photoAlbumId.id));
+    const inputFileHandler = (e, dropFiles=false) => {
+        let files = null;
+        dropFiles 
+        // ? files = Array.from(e.target.files)
+        ? files = dropFiles
+        : files = [...e.target.files]
+        
+        dispatch(setUploadDataTh(files, photoAlbumId));
+    }
+
+    //Drag and drop
+    
+    // const onDragEnterHandler = (e) => {
+    //     e.preventDefault();
+    //     console.log('Enter');
+    //     setDragStatus(true);
+    // }
+    // const onDragleaveHandler = (e) => {
+    //     e.preventDefault();
+    //     setDragStatus(false);
+    //     console.log('Leave');
+    // }
+
+    const onDropHandler = (e) => {
+        e.preventDefault();
+        const files = [...e.dataTransfer.files];
+        inputFileHandler(null, files);
     }
 
     return (
@@ -49,10 +73,16 @@ const UploadPage = () => {
                 {albums.map(({id, title}) => <option key={id} value={id}>{title}</option>)}
             </select>
 
-            <div className="upload">
+            <div className="upload" 
+                // onDragEnter={onDragEnterHandler}
+                // onDragLeave={onDragleaveHandler}
+                onDragOver={e => e.preventDefault()}
+                onDrop={onDropHandler}
+
+            >
                
                 <div className="upload__items">
-                    {uploadData.map(data => <UploadItem data={data}/>)}
+                    {uploadData && uploadData.map(data => <UploadItem key={data.id} data={data}/>)}
                 </div>
                 
                 <input  ref={inputFileRef} 

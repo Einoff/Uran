@@ -1,23 +1,26 @@
 import React, { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { uploadFile } from '../../../redux/reducers/reducer';
-import { getUploadData } from '../../../selectors/selectors';
+import { getUploadData, getUploadQueue } from '../../../selectors/selectors';
 import './uploadItem.less'
 
-const UploadItem = ({data:{id='', img='', albumId='', progress, data}}) => {
-    console.log('upload item');
-    
+const UploadItem = ({data:{id='', img='', albumId='', data}}) => {
     const dispatch = useDispatch();
-    // const {progress} = useSelector(getUploadData).find(item => item.id == id);
-    
-    useEffect(() => {
-        dispatch(uploadFile(id, albumId, data, img));
-    }, [])
-    
+    const {queueId, progress} = useSelector(getUploadQueue);
+
+    // useEffect(() => {
+        if(!queueId) dispatch(uploadFile(id, albumId, data));
+    // }, [id])
+
     return (
         <div key={id} className="upload__item">
             <img src={img} alt="img" />
-            <div className="upload__progress" style={{right: progress + '%'}}>
+            <div className="upload__progress" 
+                style={{
+                    right: (queueId == id ? 100 - progress : 100) + '%',
+                    // transform: `scale(${queueId >= 90 && '0'})` 
+                }}
+            >
             </div>
         </div>
     )

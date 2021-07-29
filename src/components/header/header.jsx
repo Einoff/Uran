@@ -6,7 +6,6 @@ import { getFbData, getLoginStatus } from '../../selectors/selectors'
 import reducer, { logout } from '../../redux/reducers/reducer'
 
 const Header = () => {
-    console.log('header');
     const loginStatus = useSelector(getLoginStatus);
 
     const dispatch = useDispatch();

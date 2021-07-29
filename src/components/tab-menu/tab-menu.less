@@ -21,3 +21,15 @@
         z-index: 2;
     }
 }
+
+
+@media (max-height: 770px) { 
+    .tab-menu {
+        position: absolute;
+        top: -2px;
+
+        &::before {
+            display: none;
+        }
+    }  
+}

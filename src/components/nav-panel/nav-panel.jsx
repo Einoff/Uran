@@ -8,7 +8,6 @@ import arrowLeft from '../../assets/icons/arrow-left.svg'
 import './nav-panel.less'
 
 const NavPanel = () => {
-    console.log('nav-panel');
     const dispatch = useDispatch();
     
     const link = useLocation();

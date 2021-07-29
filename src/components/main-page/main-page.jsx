@@ -9,9 +9,9 @@ import NavPanel from '../nav-panel/nav-panel'
 import PhotosGallery from '../photos-gallery/photos-gallery'
 import TabMenu from '../tab-menu/tab-menu'
 import UploadPage from '../upload-page/upload-page'
+import './main-page.less'
 
 const MainPage = () => {
-    console.log('main page');
 
     return (
         <div className="main-page">

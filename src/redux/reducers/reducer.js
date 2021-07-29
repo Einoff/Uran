@@ -15,7 +15,12 @@ const SET_NAV_LINK = 'SET_NAV_LINK';
 const SET_MODAL_DATA = 'SET_MODAL_DATA';
 const SET_UPLOAD_DATA = 'SET_UPLOAD_DATA';
 const SET_UPLOAD_STATUS = 'SET_UPLOAD_STATUS';
+const SET_QUEUE_ID = 'SET_QUEUE_ID';
 const UPDATE_UPLOAD_PROGRESS = 'UPDATE_UPLOAD_PROGRESS';
+const REMOVE_UPLOAD_ITEM = 'REMOVE_UPLOAD_ITEM';
+const RESET_QUEUE = 'RESET_QUEUE';
+const SET_LAZY_LOADING_STATUS = 'SET_LAZY_LOADING_STATUS';
+const LAZY_PHOTOS_BY_ALBUM_ID = 'LAZY_PHOTOS_BY_ALBUM_ID';
 
 //
 //INITIAL STATE
@@ -31,7 +36,12 @@ const initialState = {
     navLink: [],
     modalData: '',
     uploadData: [],
-    uploadFile: false
+    uploadFile: false,
+    uploadQueue: {
+        queueId: null,
+        progress: 0
+    },
+    lazyLoading: false
 }
 
 //
@@ -82,22 +92,46 @@ const mainReducer = (state = initialState, {type, payload}) => {
         case SET_UPLOAD_DATA:
             return {
                 ...state,
-                uploadData: [...state.uploadData, payload]
+                uploadData: [ ...state.uploadData, payload]
             }
-        case SET_UPLOAD_STATUS:
+        case SET_QUEUE_ID:
             return {
                 ...state,
-                uploadStatus: payload
+                uploadQueue: {
+                    ...state.uploadQueue,
+                    queueId: payload
+                }
             }
         case UPDATE_UPLOAD_PROGRESS: 
             return {
                 ...state,
-                uploadData: [
-                    ...state.uploadData.map(item => {
-                        if(item.id == payload.id) return {...item, progress: payload.progress};
-                        return {...item}
-                    }) 
-                ]
+                uploadQueue: {
+                    ...state.uploadQueue,
+                    progress: payload
+                }
+            }
+        case REMOVE_UPLOAD_ITEM: 
+            return {
+                ...state,
+                uploadData: state.uploadData.filter(item => item.id != payload) || []          
+            }
+        case RESET_QUEUE: 
+            return {
+                ...state,
+                uploadQueue: {
+                    queueId: null,
+                    progress: 0
+                }
+            }
+        case SET_LAZY_LOADING_STATUS: 
+            return {
+                ...state,
+                lazyLoading: payload
+            }
+        case LAZY_PHOTOS_BY_ALBUM_ID: 
+            return {
+                ...state,
+                photos: [...state.photos, ...payload]
             }
 
         default: return state;
@@ -149,6 +183,13 @@ const setPhotosByAlbumIdAc = (payload) => {
     }
 }
 
+const addLazyPhotosByAlbumIdAc = (payload) => {
+    return {
+        type: LAZY_PHOTOS_BY_ALBUM_ID,
+        payload
+    }
+}
+
 export const setNavLinkAc = (payload) => {
     return {
         type: SET_NAV_LINK,
@@ -177,9 +218,37 @@ const setUploadStatus = (payload) => {
     }
 }
 
+const setQueueIdAc = (payload) => {
+    return {
+        type: SET_QUEUE_ID,
+        payload
+    }
+}
+
 const updateUploadProgress = (payload) => {
     return {
         type: UPDATE_UPLOAD_PROGRESS,
+        payload
+    }
+}
+
+const removeUploadItemAC = (payload) => {
+    return {
+        type: REMOVE_UPLOAD_ITEM,
+        payload
+    }
+}
+
+const resetQueue = (payload) => {
+    return {
+        type: RESET_QUEUE,
+        payload
+    }
+}
+
+const setLazyLoadingStatusAc = (payload) => {
+    return {
+        type: SET_LAZY_LOADING_STATUS,
         payload
     }
 }
@@ -207,7 +276,6 @@ export const setInitialServData = (dispatch) => {
 //LOGIN
 export const login = (dispatch) => {
     window.VK.Auth.login(({session, status, ...rest}) => {
-        console.log('rest', rest, 'sesion: ', session) ;
         if(!session) return;
 
         const boolStatus = statusToBool(status);
@@ -230,16 +298,20 @@ export const logout = (dispatch) => {
 export const openAlbumTh = (titleAndId) => (dispatch) => {
     const id = titleAndId.split('_')[1];
     
-    window.VK.Api.call('photos.get', {album_id: id, v: '5.131'}, function({response: {items}}) {  
-        const photos = items.map(({id, sizes}) => {
+    window.VK.Api.call('photos.get', {extended: 1, album_id: id, count: 20, v: '5.131'}, function({response: {items}}) {  
+        const photos = items.map(({id, sizes, ...rest}) => {
+            const likesCount = rest.likes.count;
+            const commentsCount = rest.comments.count;
+            const repostCount = rest.reposts.count;
             const img = sizes[sizes.length-1].url
-            return { id, img};
+            return {id, img, likesCount, commentsCount, repostCount};
         })
 
         dispatch(setPhotosByAlbumIdAc(photos));
     });
 }
 
+//GET ALBUMS LIST FROM SERVER
 export const setPhotoAlbumDataTh = (dispatch) => {
     window.VK.Api.call('photos.getAlbums', {need_covers: '1', v: '5.131'}, ({response}) => {
         const albumsData = response.items.map(({id, title, description, size, thumb_src, updated}) => {
@@ -261,7 +333,7 @@ export const setNavLinkTh = ({pathname=[]}) => (dispatch) => {
         dispatch(setNavLinkAc(currentNavLink));
 }
 
-export const setModalDataTh = ({img=null, id=null, nav=false, photos=[]}) => (dispatch) => {
+export const setModalDataTh = ({img=null, id=null, nav=false, photos=[], likesCount, commentsCount, repostCount}) => (dispatch) => {
     // !img && dispatch(setModalDataAc({img, id}));
     if(nav == 'prev') {
         let current = photos.findIndex(item => item.id == id);
@@ -283,7 +355,7 @@ export const setModalDataTh = ({img=null, id=null, nav=false, photos=[]}) => (di
         return;
     }
     
-    dispatch(setModalDataAc({img, id}));
+    dispatch(setModalDataAc({img, id, likesCount, commentsCount, repostCount}));
 
 }
 
@@ -306,8 +378,57 @@ export const setUploadDataTh = (files, albumId) => (dispatch) => {
     })
 }
 
-export const uploadFile = (id='', albumId='', data, img='') => (dispatch) => {
-    vkUploadPhoto(albumId, data);
+export const uploadFile = (id='', albumId='', data) => (dispatch) => {
+    dispatch(setQueueIdAc(id));
+    
+    const updateUploadProgressCallback = (progressValue) => {
+            dispatch(updateUploadProgress(progressValue));
+    }
+
+    const removeUploadItem = () => {
+        dispatch(removeUploadItemAC(id));
+        dispatch(resetQueue(null));
+    }
+
+    vkUploadPhoto(albumId, data, updateUploadProgressCallback, removeUploadItem);
+}
+
+export const setLazyLoadingStatusTh = (id, {countPhotos, countAlbums}) => (dispatch) => {
+    
+    //if the album is empty, abort the function. This is a !bug of reloading the page with photos.
+    if(!countAlbums) return; 
+    
+    //if all photos are received from the server, abort the execution of the function
+    if(countAlbums - countPhotos <= 0) return;
+
+    //we calculate how many photos can be uploaded from the server, the current limit is 20 photos.
+    const count = countAlbums - countPhotos >= 20 
+    ? 20
+    : countAlbums - countPhotos;
+    
+    dispatch(setLazyLoadingStatusAc(true));
+    
+    const album_id = id.split('_')[1];
+    const params = {extended: 1, album_id, count, offset: countPhotos, v: '5.131'};
+
+    window.VK.Api.call('photos.get', params, function({response: {items}}) {  
+    const params = {extended: 1, album_id, count, offset: +countPhotos + 20 , v: '5.131'};
+        // const photos = items.map(({id, sizes}) => {
+        //     const img = sizes[sizes.length-1].url
+        //     return {id, img};
+        // })
+
+        const photos = items.map(({id, sizes, ...rest}) => {
+            const likesCount = rest.likes.count;
+            const commentsCount = rest.comments.count;
+            const repostCount = rest.reposts.count;
+            const img = sizes[sizes.length-1].url
+            return {id, img, likesCount, commentsCount, repostCount};
+        })
+    
+        dispatch(addLazyPhotosByAlbumIdAc(photos));
+        dispatch(setLazyLoadingStatusAc(false));
+    });
 }
 
 //
@@ -335,11 +456,11 @@ function getLastUpdateAlbumTime (previousTime) {
     return hours + ' hours ago';
 }
 
-function uploadDataOnServer(files, dispatch) {
-    window.VK.Api.call('photos.getUploadServer', {v: '5.131'}, ({response}) => {
+// function uploadDataOnServer(files, dispatch) {
+//     window.VK.Api.call('photos.getUploadServer', {v: '5.131'}, ({response}) => {
         
-    }); 
-}
+//     }); 
+// }
 
 
 

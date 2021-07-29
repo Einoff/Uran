@@ -37,3 +37,21 @@ export const getModalData = (state) => {
 export const getUploadData = (state) => {
     return state.mainReducer.uploadData;
 }
+
+export const getUploadQueue = (state) => {
+    return state.mainReducer.uploadQueue;
+}
+export const getlazyLoading = (state) => {
+    return state.mainReducer.lazyLoading;
+}
+
+export const getPaginationPhotosInfo = (titleAndId) => ({mainReducer}) => {
+    const id = titleAndId.split('_')[1];
+
+    const countPhotos = mainReducer.photos.length;
+    const countAlbums = mainReducer.photoAlbums.length 
+    ? mainReducer.photoAlbums.find(item => item.id == id).size
+    : ''
+
+    return {countPhotos, countAlbums}
+}

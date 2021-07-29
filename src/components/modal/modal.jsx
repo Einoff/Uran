@@ -1,14 +1,17 @@
 import React from 'react'
-import { useDispatch, useSelector } from 'react-redux';
-import { setModalDataTh } from '../../redux/reducers/reducer';
+import { useDispatch, useSelector } from 'react-redux'
+import { setModalDataTh } from '../../redux/reducers/reducer'
 import prevArrow from '../../assets/icons/arrow-left-w.svg'
 import nextArrow from '../../assets/icons/right-arrow.svg'
+import infoIcon from '../../assets/icons/info.svg'
 import './modal.less'
-import { getPhotos } from '../../selectors/selectors';
+import { getPhotos } from '../../selectors/selectors'
+import likesIcon from '../../assets/icons/heart.svg'
+import commentIcon from '../../assets/icons/comment.svg'
+import shareIcon from '../../assets/icons/share.svg'
 
 const Modal = ({modalData}) => {
-    console.log('modal');
-
+    
     const dispatch = useDispatch();
     const photos = useSelector(getPhotos)
 
@@ -35,6 +38,26 @@ const Modal = ({modalData}) => {
                 </div>
             <div className="modal__content">
                 <img src={modalData.img} alt="image" onClick={(e) => {e.stopPropagation()}}/>
+                
+            </div>
+            <div className="modal__content-info">
+                <div className="info__btn">
+                    <img src={infoIcon} alt="info" />
+                </div>
+                <div className="info__content">
+                            <div className="info-icon">
+                                <img src={likesIcon} alt="likes" />
+                                <span>{modalData.likesCount}</span>
+                            </div>
+                            <div className="info-icon">
+                                <img src={commentIcon} alt="comments" />
+                                <span>{modalData.commentsCount}</span>
+                            </div>
+                            <div className="info-icon">
+                                <img src={shareIcon} alt="share" />
+                                <span>{modalData.repostCount}</span>
+                            </div>
+                </div>
             </div>
         </div>
     )
