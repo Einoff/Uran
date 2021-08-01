@@ -433,22 +433,6 @@ function statusToBool (status) {
     let statusFlag = false;
     if(status === 'connected') statusFlag = true;
     return statusFlag;
-  }
-
-function setUserName (dispatch) {
-    window.VK.Api.call('users.get', {v: '5.131'}, ({response}) => {
-        dispatch(setNameOfLoginedUser(response[0].first_name)); 
-    }); 
 }
-
-// function getLastUpdateAlbumTime (previousTime) {
-//     const currentTime = parseInt(new Date().getTime());
-//     const hours = new Date(currentTime - (previousTime * 1000)).getHours();
-//     if ((hours / 8770) >= 1 ) return parseInt(hours / 8760) + ' years ago';
-//     if ((hours / 720) >= 1) return parseInt(hours / 720) +  ' months ago';
-//     if ((hours / 24) >= 1) return parseInt(hours / 24) + ' days ago';
-    
-//     return hours + ' hours ago';
-// }
 
 export default mainReducer;
