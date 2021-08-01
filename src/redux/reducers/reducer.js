@@ -1,5 +1,5 @@
 import { vkUploadPhoto } from "../../vkontakteAPI/uploadFile";
-import vkApi from "../../vkontakteAPI/vkApi";
+import VKAPI from "../../vkontakteAPI/vkApi";
 const axios = require('axios');
 
 //
@@ -258,71 +258,59 @@ const setLazyLoadingStatusAc = (payload) => {
 //
 
 //INIT
-export const setInitialServData = (dispatch) => {
-    const initServData = () => {
-        window.VK.Auth.getLoginStatus(({status, ...rest}) => {
-            const boolStatus = statusToBool(status);
-            dispatch(setLoginStatus(boolStatus));
+export const setInitialServData = dispatch => {
+    const initResultEvent = () => {
+        const loginStatusRequest = status => {
+            dispatch(setLoginStatus(status));
+        }
 
-            if(!status) return;
-            
-            setUserName(dispatch);
-        });
+        VKAPI.getLoginStatus(loginStatusRequest);        
     }
 
-    vkApi.init(initServData);
+    VKAPI.init(initResultEvent);
 }
 
 //LOGIN
-export const login = (dispatch) => {
-    window.VK.Auth.login(({session, status, ...rest}) => {
-        if(!session) return;
-
+export const login = dispatch => {
+    const loginResultEvent = ({session, status, ...rest}) => {
+        if(!session) throw `login error ${status}`
         const boolStatus = statusToBool(status);
         dispatch(setLoginStatus(boolStatus));
 
         const firstName = session.user.first_name;
         dispatch(setNameOfLoginedUser(firstName));
-    }, 4);
+    }
+
+    VKAPI.login(loginResultEvent)
 }   
 
 //LOGOUT
-export const logout = (dispatch) => {
-    window.VK.Auth.logout(({status}) => {
-        const boolStatus = statusToBool(status)
+export const logout = dispatch => {
+    const logoutResultEvent = result => {
+        const boolStatus = statusToBool(status);
         dispatch(setLoginStatus(boolStatus));
-        dispatch(setNameOfLoginedUser('unknown'))
-    });
-}
+        dispatch(setNameOfLoginedUser('unknown'));
+    }
 
-export const openAlbumTh = (titleAndId) => (dispatch) => {
-    const id = titleAndId.split('_')[1];
-    
-    window.VK.Api.call('photos.get', {extended: 1, album_id: id, count: 20, v: '5.131'}, function({response: {items}}) {  
-        const photos = items.map(({id, sizes, ...rest}) => {
-            const likesCount = rest.likes.count;
-            const commentsCount = rest.comments.count;
-            const repostCount = rest.reposts.count;
-            const img = sizes[sizes.length-1].url
-            return {id, img, likesCount, commentsCount, repostCount};
-        })
-
-        dispatch(setPhotosByAlbumIdAc(photos));
-    });
+    VKAPI.logout(logoutResultEvent);
 }
 
 //GET ALBUMS LIST FROM SERVER
-export const setPhotoAlbumDataTh = (dispatch) => {
-    window.VK.Api.call('photos.getAlbums', {need_covers: '1', v: '5.131'}, ({response}) => {
-        const albumsData = response.items.map(({id, title, description, size, thumb_src, updated}) => {
-            const lastUpdate = getLastUpdateAlbumTime(updated);
-            return {id, title, description, size, thumb_src, lastUpdate};
-        })
-
-        albumsData.reverse();
-
+export const setPhotoAlbumDataTh = dispatch => {
+    const albumsResultEvent = albumsData => {
         dispatch(setPhotoAlbumDataAc(albumsData));
-    });
+    }
+
+    VKAPI.getAlbums(albumsResultEvent);
+}
+
+export const openAlbumTh = titleAndId => dispatch => {
+    const id = titleAndId.split('_')[1];
+    const photosResultEvent = photos => {
+        dispatch(setPhotosByAlbumIdAc(photos));
+    }
+
+    VKAPI.getPhotosFromAlbum(photosResultEvent, id);
 }
 
 export const setNavLinkTh = ({pathname=[]}) => (dispatch) => {
@@ -334,7 +322,7 @@ export const setNavLinkTh = ({pathname=[]}) => (dispatch) => {
 }
 
 export const setModalDataTh = ({img=null, id=null, nav=false, photos=[], likesCount, commentsCount, repostCount}) => (dispatch) => {
-    // !img && dispatch(setModalDataAc({img, id}));
+    
     if(nav == 'prev') {
         let current = photos.findIndex(item => item.id == id);
         
@@ -363,7 +351,7 @@ export const setUploadDataTh = (files, albumId) => (dispatch) => {
     files.forEach((file) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
-        reader.onload =() => {
+        reader.onload = () => {
             const id = new Date().getTime();
 
             const uploadData = {
@@ -401,7 +389,7 @@ export const setLazyLoadingStatusTh = (id, {countPhotos, countAlbums}) => (dispa
     //if all photos are received from the server, abort the execution of the function
     if(countAlbums - countPhotos <= 0) return;
 
-    //we calculate how many photos can be uploaded from the server, the current limit is 20 photos.
+    //calculate how many photos can be uploaded from the server, the current limit is 20 photos.
     const count = countAlbums - countPhotos >= 20 
     ? 20
     : countAlbums - countPhotos;
@@ -434,11 +422,12 @@ export const setLazyLoadingStatusTh = (id, {countPhotos, countAlbums}) => (dispa
 //
 //HELPERS
 //
+
 function statusToBool (status) {
     let statusFlag = false;
     if(status === 'connected') statusFlag = true;
     return statusFlag;
-}
+  }
 
 function setUserName (dispatch) {
     window.VK.Api.call('users.get', {v: '5.131'}, ({response}) => {
@@ -446,22 +435,14 @@ function setUserName (dispatch) {
     }); 
 }
 
-function getLastUpdateAlbumTime (previousTime) {
-    const currentTime = parseInt(new Date().getTime());
-    const hours = new Date(currentTime - (previousTime * 1000)).getHours();
-    if ((hours / 8770) >= 1 ) return parseInt(hours / 8760) + ' years ago';
-    if ((hours / 720) >= 1) return parseInt(hours / 720) +  ' months ago';
-    if ((hours / 24) >= 1) return parseInt(hours / 24) + ' days ago';
+// function getLastUpdateAlbumTime (previousTime) {
+//     const currentTime = parseInt(new Date().getTime());
+//     const hours = new Date(currentTime - (previousTime * 1000)).getHours();
+//     if ((hours / 8770) >= 1 ) return parseInt(hours / 8760) + ' years ago';
+//     if ((hours / 720) >= 1) return parseInt(hours / 720) +  ' months ago';
+//     if ((hours / 24) >= 1) return parseInt(hours / 24) + ' days ago';
     
-    return hours + ' hours ago';
-}
-
-// function uploadDataOnServer(files, dispatch) {
-//     window.VK.Api.call('photos.getUploadServer', {v: '5.131'}, ({response}) => {
-        
-//     }); 
+//     return hours + ' hours ago';
 // }
-
-
 
 export default mainReducer;
