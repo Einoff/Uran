@@ -260,11 +260,19 @@ const setLazyLoadingStatusAc = (payload) => {
 //INIT
 export const setInitialServData = dispatch => {
     const initResultEvent = () => {
+        // SET LOGIN STATUS
         const loginStatusRequest = status => {
             dispatch(setLoginStatus(status));
         }
 
-        VKAPI.getLoginStatus(loginStatusRequest);        
+        VKAPI.getLoginStatus(loginStatusRequest);  
+        
+        //SET USER NAME
+        const getUserNameEvent = userName => {
+            dispatch(setNameOfLoginedUser(userName));
+        }
+
+        VKAPI.getUserName(getUserNameEvent)
     }
 
     VKAPI.init(initResultEvent);
@@ -273,18 +281,13 @@ export const setInitialServData = dispatch => {
 //LOGIN
 export const login = dispatch => {
     const loginResultEvent = ({session, status, ...rest}) => {
-        if(!session) throw `login error ${status}`
+        if(!session) throw `login error ${status}`;
+
         const boolStatus = statusToBool(status);
         dispatch(setLoginStatus(boolStatus));
 
         const firstName = session.user.first_name;
         dispatch(setNameOfLoginedUser(firstName));
-
-        const getUserNameEvent = userName => {
-            dispatch(setNameOfLoginedUser(userName));
-        }
-
-        VKAPI.getUserName(getUserNameEvent)
     }
 
     VKAPI.login(loginResultEvent)
