@@ -279,6 +279,12 @@ export const login = dispatch => {
 
         const firstName = session.user.first_name;
         dispatch(setNameOfLoginedUser(firstName));
+
+        const getUserNameEvent = userName => {
+            dispatch(setNameOfLoginedUser(userName));
+        }
+
+        VKAPI.getUserName(getUserNameEvent)
     }
 
     VKAPI.login(loginResultEvent)

@@ -68,7 +68,15 @@ const vkApi2_0 = {
       albumsData.reverse();
 
       albumsResultEvent(albumsData);
-  });
+    })
+  },
+
+  //GET USER NAME
+  getUserName: (getUserNameEvent) => {
+    window.VK.Api.call('users.get', {v: '5.131'}, ({response}) => {
+      getUserNameEvent(response[0].first_name);
+    }); 
+    
   }
 }
 
