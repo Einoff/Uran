@@ -258,68 +258,51 @@ const setLazyLoadingStatusAc = (payload) => {
 //
 
 //INIT
-export const setInitialServData = dispatch => {
-    const initResultEvent = () => {
-        // SET LOGIN STATUS
-        const loginStatusRequest = status => {
-            dispatch(setLoginStatus(status));
-        }
+export const setInitialServData = async (dispatch) => {
+    const {init, getLoginStatus, getUserName} = VKAPI;
+    
+    await init();
 
-        VKAPI.getLoginStatus(loginStatusRequest);  
-        
-        //SET USER NAME
-        const getUserNameEvent = userName => {
-            dispatch(setNameOfLoginedUser(userName));
-        }
+    const status = await getLoginStatus();
+    const boolStatus = statusToBool(status);
+    dispatch(setLoginStatus(boolStatus));
 
-        VKAPI.getUserName(getUserNameEvent)
-    }
-
-    VKAPI.init(initResultEvent);
+    const userName = await getUserName();
+    dispatch(setNameOfLoginedUser(userName));
 }
 
 //LOGIN
-export const login = dispatch => {
-    const loginResultEvent = ({session, status, ...rest}) => {
-        if(!session) throw `login error ${status}`;
+export const login = async (dispatch) => {
+    const {session, status} = await VKAPI.login();
 
-        const boolStatus = statusToBool(status);
-        dispatch(setLoginStatus(boolStatus));
+    const boolStatus = statusToBool(status);
+    dispatch(setLoginStatus(boolStatus));
 
-        const firstName = session.user.first_name;
-        dispatch(setNameOfLoginedUser(firstName));
-    }
-
-    VKAPI.login(loginResultEvent)
+    const firstName = session.user.first_name;
+    dispatch(setNameOfLoginedUser(firstName));
 }   
 
 //LOGOUT
-export const logout = dispatch => {
-    const logoutResultEvent = result => {
-        const boolStatus = statusToBool(status);
-        dispatch(setLoginStatus(boolStatus));
-        dispatch(setNameOfLoginedUser('unknown'));
-    }
+export const logout = async (dispatch) => {
+    const {status} = await VKAPI.logout();
 
-    VKAPI.logout(logoutResultEvent);
+    const boolStatus = statusToBool(status);
+
+    dispatch(setLoginStatus(boolStatus));
+    dispatch(setNameOfLoginedUser(status));
 }
 
 //GET ALBUMS LIST FROM SERVER
-export const setPhotoAlbumDataTh = dispatch => {
-    const albumsResultEvent = albumsData => {
-        dispatch(setPhotoAlbumDataAc(albumsData));
-    }
-
-    VKAPI.getAlbums(albumsResultEvent);
+export const setPhotoAlbumDataTh = async (dispatch) => {
+    const albumsData = await VKAPI.getAlbums();
+    dispatch(setPhotoAlbumDataAc(albumsData));
 }
 
-export const openAlbumTh = titleAndId => dispatch => {
+//SET PHOTO FROM ALBUM
+export const openAlbumTh = titleAndId => async (dispatch) => {
     const id = titleAndId.split('_')[1];
-    const photosResultEvent = photos => {
-        dispatch(setPhotosByAlbumIdAc(photos));
-    }
-
-    VKAPI.getPhotosFromAlbum(photosResultEvent, id);
+    const photos = await VKAPI.getPhotosFromAlbum(id);
+    dispatch(setPhotosByAlbumIdAc(photos));
 }
 
 export const setNavLinkTh = ({pathname=[]}) => (dispatch) => {
